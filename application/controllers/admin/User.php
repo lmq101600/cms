@@ -71,7 +71,9 @@ class User extends MY_Controller {
 			json_code(-1, null, "111");
 		}
 		empty($user_level) && $user_level = 1;
+		
 		$userlevel = c("table_desc")['user']['user_level'];
+
 		$userlevel = getTableColumnInfo("user" ,'user_level' ,'colmunvalue');
 
 		if (empty($userlevel[$user_level]) || $userinfo['level'] <= $user_level) {
