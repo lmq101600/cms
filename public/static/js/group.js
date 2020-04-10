@@ -1,5 +1,66 @@
 $(function(){
+	$("#addgroup .save").click(function () {
+        var gname = $("#addgroup input[name='gname']").val();
+        if(!gname) {
+            $("#addgroup input[name='gname']").addClass('has-error');
+        } else {
+            $("#addgroup input[name='gname']").removeClass('has-error');
+        }
+        $("#addgroup").modal("hide");
+        $.ajax({
+            url:baseurl+"Group/addGroup",
+            dataType:"json",
+            data:{gname:gname},
+            type:'POST',
+            success:function(e){
+				if(e.code==1) {
+					window.location.reload();
+				} else {
+					alertError(e.msg)
+				}
+            },
+            error:function () {
+                alertError('添加失败');
+            }
+
+        });
+       
+    });
+	$(".delete").on('click',function () {
+		var obj = this;
+		$("#delete").modal("show");
+		var id = $(this).attr("aid");
+		$("#delete .sure").off();
+		$("#delete .sure").on('click',function () {
+            $("#delete").modal("hide");
+            $.ajax({
+                url:baseurl+"Group/deleteGroup",
+                dataType:"json",
+                data:{id:id},
+                type:'POST',
+                success:function(e){
+                    if(e.code==1) {
+                    	$(obj).parent().parent().remove();
+                        // window.location.reload();
+                    } else {
+                        alertError(e.msg)
+                    }
+                },
+                error:function () {
+                    alertError('删除失败');
+                }
+
+            });
+        });
+    });
+
+    return;
+	
+	
+	
+	
 	$("#addgroup .save").click(function(){
+		var gname = $("#addgroup input[name='gname']").val();
 		var gname = $("#addgroup input[name='gname']").val();
 		if(!gname)
 		{
@@ -10,7 +71,7 @@ $(function(){
 		}
 		$("#addgroup").modal("hide");
 		$.loadajax({
-			url:baseurl+"Group/ajaxAddGroup?gname="+gname,
+			url:baseurl+"Group/addGroup?gname="+gname,
 			success:function(res)
 			{
 				if(res.code==1)

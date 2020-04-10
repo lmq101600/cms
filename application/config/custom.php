@@ -49,6 +49,6 @@ $config['keyword_action'] = array(
 */
 $config['normaladmin'] = array(
 	array(
-		'action'=>"/m/user/index"
+		'action'=>"/admin/user/index"
 	)
 );

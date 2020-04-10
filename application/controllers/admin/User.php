@@ -73,13 +73,10 @@ class User extends MY_Controller {
 		empty($user_level) && $user_level = 1;
 		
 		$userlevel = c("table_desc")['user']['user_level'];
-
 		$userlevel = getTableColumnInfo("user" ,'user_level' ,'colmunvalue');
-
 		if (empty($userlevel[$user_level]) || $userinfo['level'] <= $user_level) {
 			json_code(-2, null, "222");
 		}
-	
 		$arr['uname'] = $uname;
 		$arr['user_level'] = $user_level;
 		$arr['pwd'] = $pwd;
@@ -87,6 +84,7 @@ class User extends MY_Controller {
 		if($user_level==2)
 		{
 			$arrRight = c("normaladmin");
+			var_dump($arrRight);
 			$strRight = "";
 			if(!empty($arrRight))
 			{

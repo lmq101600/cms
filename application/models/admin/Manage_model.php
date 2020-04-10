@@ -46,6 +46,18 @@ class Manage_model extends CI_Model {
 		return $this->_db->get($this->_strPlatMenu)->result_array();
 	}
 
+
+	function getMenuAll($arrWhere = array()) {
+
+		$this->_db->order_by('sort', 'asc');
+//		$this->_db->limit(3);
+//		$arrWhere['type'] = 1;
+//		$arrWhere['status'] = 1;
+//		$this->_db->where($arrWhere);
+		$this->_db->where(array('status' => 1));
+		return $this->_db->get($this->_strPlatMenu)->result_array();
+	}
+
 	// 获取目录
 	function getMenuByWhere($arrWhere = array()) {
 		return $this->_db->get_where($this->_strPlatMenu, $arrWhere)->result_array();
