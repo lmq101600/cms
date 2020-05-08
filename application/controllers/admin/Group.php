@@ -51,7 +51,7 @@ class Group extends MY_Controller
 		
 		$this->load->model('admin/Manage_model');
 		
-		$arrAllMenuList = $this->Manage_model->getMenuAll(array('system'=>2));
+		$arrAllMenuList = $this->Manage_model->getMenu(array('system'=>2));
 
 
 //		//所有目录
@@ -65,8 +65,10 @@ class Group extends MY_Controller
 //				$arrAllMenulink[$arrMenu['parent']][] = $arrMenu;
 //			}
 //		}
+	
 		//所有目录
 		$arrAllMenuKv = $this->list_to_tree($arrAllMenuList);
+//		var_dump($arrAllMenuKv);die;
 		//所有权限
 		$arrAction = $this->Manage_model->getAction();
 		$actionAllList = array();
@@ -90,7 +92,6 @@ class Group extends MY_Controller
 		
 		//该分组现在所有的权限
 		$data['arrCurentRight'] = $arrCurentRight;
-
 		//所有目录和权限
 		$data['actionAllList'] = $actionAllList;
 		$data['arrAllMenuKv'] = $arrAllMenuKv;
@@ -100,7 +101,7 @@ class Group extends MY_Controller
 		$this->load->load_template('admin/manage/editgroupright',$data);
 	}
 	//创建无限极树状结构
-	function list_to_tree($list, $pk='id', $pid = 'parent', $child = 'info', $root = 0)
+	function list_to_tree($list, $pk='id', $pid = 'parent', $child = '_list', $root = 0)
 	{
 		//创建Tree
 		$tree = [];
@@ -124,6 +125,40 @@ class Group extends MY_Controller
 			}
 		}
 		return $tree;
+	}
+
+	function saveUserGroupRight() {
+
+		$ugid = $this->input->post('ugid', true);
+		$postRight = $this->input->post('right', true);
+
+		$arrWhere = array(
+			'id' => $ugid,
+		);
+		$arrUser = $this->model->getUserGroup($arrWhere);
+		if (empty($arrUser)) {
+			json_code(-1, array(), "权限组不存在");
+		}
+		$insert = array();
+
+		if (!empty($postRight)) {
+			foreach ($postRight as $key => $pmid) {
+				if(intval( $pmid) <= 0)
+				{
+					continue;
+				}
+				$insert[] = array(
+					'ugid'=>$ugid,
+					'pmid'=>$pmid
+				);
+			}
+		}
+
+		$bool = $this->model->updateGroupRight($insert, $ugid);
+		if (!$bool) {
+			json_code(-5, array(), '更新失败');
+		}
+		json_code(1, array(), 'success');
 	}
 	
 }

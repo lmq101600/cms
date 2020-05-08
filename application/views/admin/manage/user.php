@@ -273,3 +273,40 @@
 
     })
 </script>
+
+
+<div class="modal fade" id="test1window" tabindex="-1" role="basic" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                <h4 class="modal-title">修改用户信息</h4>
+            </div>
+            <div class="errormsg">
+            </div>
+            <div class="modal-body form-horizontal">
+                <div class="form-body">
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">昵称</label>
+                        <div class="col-md-9">
+                            <input type="text" name="nick_name" class="form-control input-inline input-medium" placeholder="昵称">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">状态</label>
+                        <div class="col-md-9 radio-list" style="padding-left: 35px;">
+                            <label class="radio-inline">
+                                <div class=""><span class=""><input type="radio" name="status" value="2" ></span></div> 正常 </label>
+                            <label class="radio-inline">
+                                <div class=""><span class=""><input type="radio" name="status" value="3"></span></div> 锁定 </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn default" data-dismiss="modal">放弃</button>
+                <button type="button" class="btn blue save">保存</button>
+            </div>
+        </div>
+    </div>
+</div>

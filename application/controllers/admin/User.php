@@ -31,7 +31,6 @@ class User extends MY_Controller {
 
 
 		$arrLevel = getTableColumnInfo("user" ,'user_level' ,'colmunvalue');
-
 		$data['arrlevel'] = array();
 		foreach ($arrLevel as $key => $value) {
 			$level > $key ? $data['arrlevel'][$key] = $value : "";
@@ -84,11 +83,10 @@ class User extends MY_Controller {
 		if($user_level==2)
 		{
 			$arrRight = c("normaladmin");
-			var_dump($arrRight);
 			$strRight = "";
 			if(!empty($arrRight))
 			{
-				foreach (s as $key => $value) {
+				foreach ($arrRight as $key => $value) {
 					$strRight.=$value['action'].",";
 				}
 				$strRight = substr($strRight,0, -1);
@@ -97,7 +95,7 @@ class User extends MY_Controller {
 		}
 		$user = $this->model->addUser($arr);
 		$data['uname'] = $uname;
-//		wlog($this->GUSER."添加了用户:".$uname);
+		wlog($this->GUSER."添加了用户:".$uname);
 		json_code($user['code'], $data, $user['msg']);
 	}
 
@@ -141,12 +139,12 @@ class User extends MY_Controller {
 
 	// 管理员修改密码
 	function ajaxAdminCPwd() {
+		
 		$uid = $this->input->post('id', true);
 		$arrUser = $this->model->getUserByUid($uid);
 		$loginuUser = checkLogin();
 		if (empty($arrUser) || $loginuUser['level'] <= $arrUser['user_level']) {
-//			errorpage('用户不存在或没有操作权限');
-			json_code(-1, null, "用户不存在");
+			errorpage('用户不存在或没有操作权限');
 		}
 	
 		$uname = $arrUser['username'];
@@ -154,19 +152,20 @@ class User extends MY_Controller {
 		if ($pwd == "") {
 			json_code(-1, null, "参数错误");
 		}
-		$salt = getRand(16);
-		$data['password'] = password($pwd, $salt);
+//		$salt = getRand(16);
+		$data['password'] = password($pwd, $arrUser['salt']);
+//		$data['password'] = md5($pwd);
 		$where['id'] = $uid;
 		$isS = $this->model->updateUser($data, $where);
 		if (!$isS) {
 			json_code(-3, null, "修改密码失败");
 		}
 		wlog($this->GUSER."修改".$uname."的密码");
-		json_code(1, 1, "更新成功");
+		json_code(1, array(), "success");
 	}
 	//权限编辑页
 	function editRight() {
-		
+		$userinfo = checkLogin();
 		$uid = $this->input->get('id', true);
 		$arrUser = $this->model->getUserByUid($uid);
 		$loginuUser = checkLogin();
@@ -177,8 +176,71 @@ class User extends MY_Controller {
 		if ($arrUser['user_level'] == 8 || $arrUser['user_level'] == 4) {
 			errorpage('该用户不允许权限分配');
 		}
+		//当前所有目录
+		$this->load->model('admin/Manage_model');
+		$arrAllMenuList = $this->Manage_model->getMenu(array('system'=>2));
+		$arrAllMenuKv = $this->list_to_tree($arrAllMenuList);
+		
+		
+		//当前所有权限
+		$arrAction = $this->Manage_model->getAction();
+		$actionAllList = array();
+		if (!empty($arrAction)) {
+			foreach ($arrAction as $value) {
+				$actionAllList[$value['parent']][] = $value;
+			}
+		}
+		$strGroup = '';
+		//是否为管理员或超级管理员
+		$isadmin = checkRight();
+		if (!$isadmin) {
+			$strGroup = $userinfo['group'];
+		}
+		$arrGroup = $this->model->getUserGroup($strGroup);
+		//当前管理员可分配的权限
+		$arrRight = array();
+		if ($isadmin) {
+			//重复查询目录，待优化
+			$arrLinkRight = $this->Manage_model->getMenuByWhere();
+			if (!empty($arrLinkRight)) {
+				foreach ($arrLinkRight as $value) {
+					!empty($value['action']) && $arrRight[] = $value['action'];
+				}
+			}
+		} else {
+			$arrRight = json_decode($userinfo['right'], true);
+		}
+
+		
+		
+		//当前用户已有权限
+		$arrCurentRight = empty($arrUser['user_right']) ? array() : explode(",", $arrUser['user_right']);	//用户现有权限
+		//当前用户所属组
+		$arrCurentGroup = empty($arrUser['user_group']) ? array() : explode(",", $arrUser['user_group']);	//用户所属组
+		
+		if($arrUser['user_group']) {
+			$group_right = $this->model->getUserRight($arrUser['user_group'],'',2);
+			!empty($group_right) && $arrCurentRight = array_merge($arrCurentRight,json_decode($group_right,true));
+		}
+//		$sql = "select p.action from user_group_right u LEFT JOIN plat_menu p where u.pmid=p.id and u.ugid in {$arrUser['user_group']}";
+
+
+
+		//当前管理员可分配的权限组
+		$data['arrGroup'] = $arrGroup;	//当前管理员可分配的组
+		$data['arrRight'] = $arrRight;	//当前管理员可分配的权限
+		
+		$data['arrCurentGroup'] = $arrCurentGroup;	//当前用户所属组
+		$data['arrCurentRight'] = $arrCurentRight;	//当前用户所有权限
+		
+		
+		$data['arrAllMenuKv'] = $arrAllMenuKv;	//所有目录列表
+		$data['actionAllList'] = $actionAllList;//所有权限列表
+		
+		
+		
 		$arrCurent = array(
-			'mname' => "user right",
+			'mname' => "edit_user_right",
 			'url' => '/admin/user/index',
 			'parent' => 1,
 		);
@@ -268,7 +330,7 @@ class User extends MY_Controller {
 		//所有目录
 		foreach ($arrAllMenuList as $arrMenu) {
 			!isset($arrAllMenulink[$arrMenu['id']]) && $arrAllMenulink[$arrMenu['id']] = array();
-			if (empty($arrMenu['parent'])) {
+			if (empty($arrMenu['parent'])) { 
 				$arrMenu['_list'] = &$arrAllMenulink[$arrMenu['id']];
 				$arrAllMenuKv[] = $arrMenu;
 			} else {
@@ -306,15 +368,15 @@ class User extends MY_Controller {
 				}
 			}
 		} else {
-			$arrRight = json_decode($userinfo['right'], true);
+			$arrRight = json_decode($userinfo['right'], true);	//普通用户自身的权限
 		}
 		
 		//当前正在分配的权限 或者 已拥有的权限
 		if (!empty($arrPost['first']) && $arrPost['first'] == 1) {
-			$userGroup = $arrUser['user_group'];	//用户组-超管都为空
+			$userGroup = $arrUser['user_group'];	//用户组user_group字段 
 			$userRigth = $arrUser['user_right'];	//用户单独权限配置
-			$arrCurentGroup = empty($userGroup) ? array() : explode(",", $userGroup);
-			$arrCurentRight = empty($userRigth) ? array() : explode(",", $userRigth);
+			$arrCurentGroup = empty($userGroup) ? array() : explode(",", $userGroup);	//用户所属组
+			$arrCurentRight = empty($userRigth) ? array() : explode(",", $userRigth);	//用户现有权限
 			if (!empty($userGroup)) {
 				$jsonRight = $this->model->getUserRight($userGroup, "", 2);	//获得用户组
 				!empty($jsonRight) && $arrCurentRight = array_merge($arrCurentRight, json_decode($jsonRight, true));

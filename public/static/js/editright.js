@@ -1,6 +1,38 @@
 window.onload=function()
 {
-	geteditright();
+    var uid = $("#uid").val();
+
+    $(".grouplist input").click(function(){
+        var group = [];
+        var right = [];
+        $(".grouplist input").each(function(){
+            $(this).is(':checked') && group.push($(this).val())
+        })
+        $(".rightare input").each(function(){
+            $(this).is(':checked') && right.push($(this).val())
+        })
+
+        $.loadajax({
+            url:baseurl+"/User/ajaxGetLoginUserRight",
+            type:"post",
+            data:{
+                group:group,
+                right:right,
+                uid:uid
+            },
+            success:function(res)
+            {
+                var data = res.data;
+                $("#editright").html(data['view']);
+                reloadrightpage();
+            },error:function()
+            {
+                alertError("页面加载失败 ，请刷新");
+            }
+        })
+
+    })
+	// geteditright();
 	$(".saveright").click(function(){
 		var group = [];
 		var right = [];

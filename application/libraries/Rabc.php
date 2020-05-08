@@ -47,7 +47,7 @@ class Rabc
 	{
 		$CI = &get_instance();
 		$CI->load->model('admin/Manage_model');
-		$arrMenuList = $CI->Manage_model->getMenu();
+		$arrMenuList = $CI->Manage_model->getMenu();	//所有的目录
 		$arrRes = array();
 		$arrCurent = array(
 			'mname' => '',
@@ -58,8 +58,8 @@ class Rabc
 		$resFd = $CI->router->fetch_directory();
 		$atfunc =  empty($resFd)?"/":"/".$CI->router->fetch_directory();
 		$atfunc .= $CI->router->fetch_class()."/".$CI->router->fetch_method();
-		$atfunc = strtolower($atfunc);
-		if (! empty($arrMenuList)) {
+		$atfunc = strtolower($atfunc);	///welcome/index
+		if (! empty($arrMenuList)) {	//所有的目录
 			$arrLinkMenu = array();
 			foreach ($arrMenuList as $key => $arrMenu) {
 				$bool = false;
@@ -87,7 +87,7 @@ class Rabc
 				}
 			}
 		}
-		//是否为管理员
+		//是否为管理员，非管理员根据用户所有权限，销毁用户无权看到的目录
 		if(!$this->check(''))
 		{
 			$CI = & get_instance();

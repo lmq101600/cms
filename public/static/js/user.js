@@ -120,9 +120,7 @@ window.onload=function(){
                 type:"post",
                 data:{id:id, pwd:md5(newpwd)},
                 success:function(res)
-                {
-                    console.log(res);
-                    return;
+                {   
                     if(res.code == 1)
                     {
                         alertSuccess("修改成功");

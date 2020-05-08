@@ -25,6 +25,11 @@ class Group_model extends CI_Model
 		$query = $this->_db->get_where($this->user_group,$data);
 		return  $query->result_array();
 	}
+
+	function getUserGroup($arrWhere = array())
+	{
+		return $this->_db->get_where($this->user_group , $arrWhere)->result_array();
+	}
 	
 	public function addGroup($data){
 		return $this->_db->insert($this->user_group,$data);
@@ -39,6 +44,18 @@ class Group_model extends CI_Model
 		$sql = "select p.action,u.pmid from {$this->user_group_right} u left join {$this->plat_menu} as p on u.pmid = p.id where u.ugid = ? ";
 		
 		return $this->_db->query($sql , array($id))->result_array();
+	}
+	function updateGroupRight($insert, $ugid)
+	{
+		$this->_db->trans_start();
+		$this->_db->delete($this->user_group_right ,array('ugid'=>$ugid) );
+		$this->_db->insert_batch($this->user_group_right , $insert);
+		$this->_db->trans_complete();
+		if ($this->_db->trans_status() === FALSE)
+		{
+			return false;
+		}
+		return true;
 	}
 
 }

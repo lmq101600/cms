@@ -39,10 +39,12 @@ class Manage_model extends CI_Model {
 
 		$this->_db->order_by('sort', 'asc');
 //		$this->_db->limit(3);
-//		$arrWhere['type'] = 1;
-//		$arrWhere['status'] = 1;
-//		$this->_db->where($arrWhere);
-		$this->_db->where(array('type' => 1,'status' => 1));
+		$arrWhere['type'] = 1;
+		$arrWhere['status'] = 1;
+//		$arrWhere['system'] = 2;
+		
+		$this->_db->where($arrWhere);
+//		$this->_db->where(array('type' => 1,'status' => 1));
 		return $this->_db->get($this->_strPlatMenu)->result_array();
 	}
 
@@ -50,10 +52,6 @@ class Manage_model extends CI_Model {
 	function getMenuAll($arrWhere = array()) {
 
 		$this->_db->order_by('sort', 'asc');
-//		$this->_db->limit(3);
-//		$arrWhere['type'] = 1;
-//		$arrWhere['status'] = 1;
-//		$this->_db->where($arrWhere);
 		$this->_db->where(array('status' => 1));
 		return $this->_db->get($this->_strPlatMenu)->result_array();
 	}
